@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Access: Riya Birthday</title>
+    <!-- Importing a cool Retro Terminal Font -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* --- GENERAL STYLES --- */
+        :root {
+            --bg-color: #050505;
+            --text-color: #00ff41; /* Hacker Green */
+            --highlight-color: #ff00de; /* Neon Pink */
+            --font-stack: 'VT323', monospace;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- TERMINAL STYLES --- */
+        #terminal {
+            width: 90%;
+            max-width: 900px;
+            height: 80vh;
+            padding: 20px;
+            font-size: 1.5rem; /* Larger font */
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+            overflow-y: auto;
+            position: relative;
+            z-index: 5;
+            transition: filter 1s ease;
+        }
+
+        /* Scrollbar hiding */
+        #terminal::-webkit-scrollbar { width: 5px; }
+        #terminal::-webkit-scrollbar-thumb { background: #003300; }
+
+        .line {
+            margin-bottom: 25px; /* Increased from 10px for more space */
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .prompt {
+            color: var(--highlight-color);
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: var(--text-color);
+            animation: blink 0.8s infinite;
+            margin-left: 2px;
+            vertical-align: bottom;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* --- SURPRISE LAYER (Cake & Music) --- */
+        #surprise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #1a0b1a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 3s ease;
+            z-index: 10;
+        }
+
+        /* --- BETTER CAKE CSS --- */
+        .cake-wrapper {
+            position: relative;
+            transform: scale(0.8); /* Adjust size */
+            margin-bottom: 50px;
+        }
+
+        .plate {
+            width: 250px;
+            height: 10px;
+            background: #eee;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .layer {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 60px;
+            background: #5c3a21; /* Chocolate */
+            border-radius: 10px;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3);
+        }
+
+        .layer-bottom { bottom: 0; width: 220px; background: #6D4C41; }
+        .layer-middle { bottom: 60px; width: 190px; background: #795548; }
+        .layer-top    { bottom: 120px; width: 160px; background: #8D6E63; }
+
+        .icing {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff80ab; /* Pink Icing */
+            border-radius: 10px;
+        }
+        
+        .icing-bottom { bottom: 60px; width: 220px; height: 15px; border-radius: 5px; }
+        .icing-middle { bottom: 120px; width: 190px; height: 15px; border-radius: 5px; }
+        .icing-top    { bottom: 180px; width: 160px; height: 20px; border-radius: 10px 10px 5px 5px; }
+
+        .candle {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 40px;
+            background: repeating-linear-gradient(45deg, #fff, #fff 5px, #ff00de 5px, #ff00de 10px);
+            border-radius: 2px;
+        }
+
+        .flame {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 20px;
+            background: #ff9800;
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 10px #ff9800, 0 0 20px #ff9800;
+            animation: flicker 0.1s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); opacity: 1; }
+            100% { transform: translateX(-50%) scale(1.1); opacity: 0.8; }
+        }
+
+        /* --- LYRICS STYLES --- */
+        #lyrics-display {
+            font-size: 2rem;
+            color: #fff;
+            text-align: center;
+            height: 50px; /* Fixed height to prevent jumping */
+            margin-top: 30px;
+            text-shadow: 0 0 10px #ff00de;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            font-family: 'VT323', monospace;
+        }
+
+        /* --- BUTTONS & ERROR --- */
+        .action-buttons {
+            margin-top: 60px; /* Enough padding */
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 2s ease;
+            flex-wrap: wrap;
+            width: 100%;
+            z-index: 20;
+        }
+
+        .terminal-btn {
+            background: transparent;
+            border: 2px solid var(--highlight-color);
+            color: var(--highlight-color);
+            padding: 15px 25px;
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px var(--highlight-color);
+            transition: all 0.3s ease;
+        }
+
+        .terminal-btn:hover {
+            background: var(--highlight-color);
+            color: #000;
+            box-shadow: 0 0 20px var(--highlight-color);
+        }
+
+        .error-text {
+            color: red;
+            font-size: 1.8rem;
+            margin-top: 30px;
+            text-shadow: 0 0 10px red;
+            font-family: 'VT323', monospace;
+            display: none;
+            text-align: center;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="terminal"></div>
+
+    <div id="surprise">
+        <div class="cake-wrapper">
+            <div class="plate"></div>
+            <!-- Bottom Layer -->
+            <div class="layer layer-bottom"></div>
+            <div class="icing icing-bottom"></div>
+            <!-- Middle Layer -->
+            <div class="layer layer-middle"></div>
+            <div class="icing icing-middle"></div>
+            <!-- Top Layer -->
+            <div class="layer layer-top"></div>
+            <div class="icing icing-top"></div>
+            <!-- Candle -->
+            <div class="candle">
+                <div class="flame"></div>
+            </div>
+        </div>
+        <div id="lyrics-display"></div>
+        <div class="action-buttons" id="btn-container">
+            <button class="terminal-btn" onclick="clickDiary()">Read the Diary</button>
+            <button class="terminal-btn" onclick="clickPlans()">Show Planned Animation</button>
+        </div>
+        <div id="error-msg" class="error-text"></div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const promptText = "afeez >";
+        const typingSpeed = 90; // Slower for more realism (milliseconds)
+        const terminal = document.getElementById('terminal');
+        const lyricsDisplay = document.getElementById('lyrics-display');
+        const btnContainer = document.getElementById('btn-container');
+        const errorMsg = document.getElementById('error-msg');
+
+        // --- HELPER FUNCTIONS ---
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        function createLine() {
+            const line = document.createElement('div');
+            line.className = 'line';
+            
+            const promptSpan = document.createElement('span');
+            promptSpan.className = 'prompt';
+            promptSpan.textContent = promptText;
+            
+            const msgSpan = document.createElement('span');
+            msgSpan.className = 'msg';
+            
+            const cursor = document.createElement('span');
+            cursor.className = 'cursor';
+            
+            line.appendChild(promptSpan);
+            line.appendChild(msgSpan);
+            line.appendChild(cursor);
+            
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight; // Auto scroll
+            
+            return { msgSpan, cursor };
+        }
+
+        async function typeText(span, text) {
+            for (let char of text) {
+                span.textContent += char;
+                await sleep(typingSpeed + Math.random() * 50); // Little randomness
+            }
+        }
+
+        async function backspace(span, amount) {
+            for (let i = 0; i < amount; i++) {
+                span.textContent = span.textContent.slice(0, -1);
+                await sleep(50); // Backspace speed
+            }
+        }
+
+        function removeCursor() {
+            const cursors = document.querySelectorAll('.cursor');
+            cursors.forEach(c => c.style.display = 'none');
+        }
+
+        function clickDiary() {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = "Error: Diary has been deleted.";
+        }
+
+        function clickPlans() {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = "Error: Files and Images have been deleted.";
+        }
+
+        // --- MAIN SCRIPT ---
+        async function startTerminal() {
+            await sleep(1000);
+
+            // 1. Greeting
+            removeCursor();
+            let line = createLine();
+            await typeText(line.msgSpan, "Hii my princess… system connecting 💫");
+            await sleep(1500);
+
+            // Journey message
+            removeCursor();
+            line = createLine();
+            await typeText(
+                line.msgSpan,
+                "From the first time I met you… to this very moment, nothing has changed — you’ve always been special to me."
+            );
+            await sleep(1500);
+
+            removeCursor();
+            line = createLine();
+            await typeText(
+                line.msgSpan,
+                "Out of millions of people on , destiny somehow chose you for me."
+            );
+            await sleep(2000);
+
+            removeCursor();
+            line = createLine();
+            await typeText(
+                line.msgSpan,
+                "Every moment with you, every smile, every second… I kept falling for you."
+            );
+            await sleep(2000);
+
+            removeCursor();
+            line = createLine();
+            await typeText(
+                line.msgSpan,
+                "Today, at the midnight where a new day begins, a star was born on earth — and that star is you."
+            );
+            await sleep(1500);
+
+            // Cute moment
+            removeCursor();
+            line = createLine();
+            await typeText(line.msgSpan, "Cuteness levels = CRITICAL 💖");
+            await sleep(1500);
+
+           // 3. The Mistake (Saloni -> Sasmita)
+            removeCursor();
+            line = createLine();
+            await typeText(line.msgSpan, "happy birthday dear miss.sweet bear \uD83D\uDC80"); // Skull emoji
+            await sleep(1200); // Wait for her to see the mistake 
+
+            // CORRECTING THE MISTAKE
+            await backspace(line.msgSpan, 14); // Delete name + emoji
+            await sleep(500);
+            await typeText(line.msgSpan, "miss.Aadrika ❤️!! :D"); // Correct name
+            await sleep(1000);
+
+            removeCursor();
+            line = createLine();
+            await typeText(
+                line.msgSpan,
+                "Wishing you a bug-free year filled with smiles, love, and happiness."
+            );
+            await sleep(1500);
+
+            // Preparation
+            removeCursor();
+            line = createLine();
+            await typeText(line.msgSpan, "Wait… just a sec. Initializing celebration protocol...");
+            await sleep(2000);
+
+            // Lights off
+            removeCursor();
+            line = createLine();
+            await typeText(line.msgSpan, "sudo lights off", 150);
+            await sleep(1000);
+
+            launchSurprise();
+        }
+
+        // --- SURPRISE SEQUENCE ---
+        async function launchSurprise() {
+            terminal.style.transition = "opacity 2s";
+            terminal.style.opacity = "0";
+
+            await sleep(5000);
+
+            const surprise = document.getElementById('surprise');
+            surprise.style.opacity = "1";
+            surprise.style.pointerEvents = "auto";
+
+            const songLyrics = [
+                "Happy Birthday to you...",
+                "Happy Birthday to you...",
+                "Happy Birthday, dear Aadrika...",
+                "Happy Birthday to you!",
+                "May the sun shine bright...",
+                "On your beautiful life...",
+                "Keep smiling always :)",
+                "From: Afeez ❤️",
+                "I Wish I wana celebrate with you in person...",
+                "sooon...",
+                "i hope you like the surprise :)",
+                "P.S: Thanks for existing.",
+                "P.S: You were my first love, my first girlfriend, and a beautiful memory forever.",
+                "P.P.S: I love you more than words can express.Please Don't leave me ever.",
+                "HAPPY BIRTHDAY AGAIN MY LOVE!!! 🎉🎂❤️",
+                "End of Transmission.",
+               
+            ];
+
+            for (let i = 0; i < songLyrics.length; i++) {
+                lyricsDisplay.textContent = songLyrics[i];
+                lyricsDisplay.style.opacity = "1";
+                await sleep(3000);
+
+                if (i < songLyrics.length - 1) {
+                    lyricsDisplay.style.opacity = "0";
+                    await sleep(1000);
+                }
+            }
+
+            // Show buttons after lyrics
+            btnContainer.style.opacity = "1";
+            btnContainer.style.pointerEvents = "auto";
+        }
+
+        // START
+        startTerminal();
+
+    </script>
+</body>
+</html>
